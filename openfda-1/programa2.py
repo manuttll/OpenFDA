@@ -9,6 +9,7 @@ conn = http.client.HTTPSConnection("api.fda.gov")
 conn.request("GET", "/drug/label.json?limit=10", None, headers)
 r1 = conn.getresponse()
 resp_des = r1.read().decode("utf-8")
+print(r1.status, r1.reason)
 conn.close()
 #Una vez obtenida la información se reorganiza como anteriormente y con un pequeño bucle imprimimos los ID.
 resp = json.loads(resp_des)

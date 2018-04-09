@@ -10,6 +10,7 @@ conn = http.client.HTTPSConnection("api.fda.gov")
 conn.request("GET", "/drug/label.json", None, headers)
 r1 = conn.getresponse()
 resp_des = r1.read().decode("utf-8")
+print(r1.status, r1.reason)
 conn.close()
 
 #Una vez hecho lo anterior, reorganizamos la información obtenida en diccionarios y listas con la función loads() para poder

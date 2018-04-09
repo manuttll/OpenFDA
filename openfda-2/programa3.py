@@ -12,6 +12,7 @@ while True:
     conn.request("GET", '/drug/label.json?limit=100&skip='+str(valor_skip)+'&search=active_ingredient:"acetylsalicylic"', None, headers)
     r1 = conn.getresponse()
     resp_des = r1.read().decode("utf-8")
+    print(r1.status, r1.reason)
     conn.close()
 
 #Mediante un bucle for imprimimos la información que se desea. Usamos skip para ir recibiendo la información de cien en cien, y si
