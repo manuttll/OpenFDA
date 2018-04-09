@@ -25,7 +25,8 @@ while True:
             print('Fabricante: ', medicamento['openfda']['manufacturer_name'][0])
         else:
             print("No tenemos información del fabricante.")
-
+    #En este caso no sería necesario el uso del skip, ya que el programa devuelve menos de 100 medicamentos con acetylsalicylic,
+    #sin embargo, a priori esto no lo sabríamos y de esta forma queda un programa más completo.
     if(len(resp['results'])<100):
         break
     valor_skip=valor_skip+100
