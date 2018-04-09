@@ -4,22 +4,26 @@
 import http.client
 import json
 
-cabecera = {'User-Agent': 'http-client'}
+headers = {'User-Agent': 'http-client'}
 
 valor_skip=0
 while True:
     conn = http.client.HTTPSConnection("api.fda.gov")
-    conn.request("GET", '/drug/label.json?limit=100&skip='+str(valor_skip)+'&search=substance_name:"ASPIRIN"', None, cabecera)
+    conn.request("GET", '/drug/label.json?limit=100&skip='+str(valor_skip)+'&search=active_ingredient:"acetylsalicylic"', None, headers)
     r1 = conn.getresponse()
     resp_des = r1.read().decode("utf-8")
     conn.close()
 
-#Mediante un bucle for imprimimos la información que se desea, en caso de que la respuesta contenga 100 medicamentos (el máximo posible)
-# se mantiene el bucle While, y hasta que no se devuelven menos de 100 no se rompe.
+#Mediante un bucle for imprimimos la información que se desea. Usamos skip para ir recibiendo la información de cien en cien, y si
+#la información recibida contiene menos de 100 medicamentos, se frena el bucle.
     resp = json.loads(resp_des)
     for i in range (len (resp['results'])):
-        medicamento_info=resp['results'][i]
-        print('Fabricante: ', medicamento_info['openfda']['manufacturer_name'][0])
+        medicamento=resp['results'][i]
+        print("ID:", medicamento["id"])
+        if medicamento["openfda"]:
+            print('Fabricante: ', medicamento['openfda']['manufacturer_name'][0])
+        else:
+            print("No tenemos información del fabricante.")
 
     if(len(resp['results'])<100):
         break
