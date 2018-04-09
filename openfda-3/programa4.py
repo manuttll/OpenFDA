@@ -40,6 +40,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         content="<html><body>"
         lista=lista_medicamentos ()
+        content= "Los diez medicamentos son:"+"<br>"
         for e in lista:
             content += e+"<br>"
         content+="</body></html>"
