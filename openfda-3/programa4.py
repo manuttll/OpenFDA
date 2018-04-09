@@ -4,10 +4,10 @@ import socketserver
 import http.client
 import json
 
-PORT = 8888
+PORT = 8090
 IP ="localhost"
 #Creamos esta función que actuará como cliente para crear la lista a partir de la información que recibe de la página,
-#como en los programas anteriores
+#usando un programa similar en los  anteriores.
 def lista_medicamentos():
     lista = []
     headers = {'User-Agent': 'http-client'}
@@ -27,13 +27,12 @@ def lista_medicamentos():
             lista.append(medicamento['openfda']['generic_name'][0])
 
     return lista
-# Creamos esta clase derivada de BaseHTTPRequestHandler, que "hereda" todos los metodos de esta clase. Y los que
+# Creamos esta clase derivada de BaseHTTPRequestHandler, que "hereda" todos los métodos de esta clase. Y los que
 # nosotros consideremos los podemos reemplazar por los nuestros.
 class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
     # GET. Este metodo se invoca automaticamente cada vez que hay una peticion GET por HTTP.
     def do_GET(self):
-
         self.send_response(200)
 
     #Llamamos a la función lista y vamos pasando sus componentes al formato html de uno en uno.
