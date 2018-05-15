@@ -10,6 +10,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
 
     def get_main_page(self):
+    #con esta función creamos el formulario de pantalla inicial.
         html = """
             <html>
                 <head>
@@ -48,6 +49,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                 """
         return html
     def dame_web (self, lista):
+    #Con esta función pones en lenguaje html la información que extraemos y queremos mostrar al usuario.
         list_html = """
                                 <html>
                                     <head>
@@ -65,7 +67,8 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                                 </html>
                             """
         return list_html
-    def dame_resultados_genericos (self, limit=10):
+    def resultados_generales (self, limit=10):
+    #Con esta función vamos a poder obtener tantos resultados como el límite que se haya pasado.
         conn = http.client.HTTPSConnection("api.fda.gov")
         conn.request("GET", "/drug/label.json" + "?limit="+str(limit))
         print ("/drug/label.json" + "?limit="+str(limit))
@@ -84,9 +87,9 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         limit = 1 #ponemos por defecto que el límite sea igual a 1
 
         if parametros:
-            parse_limit = parametros.split("=") #aquí vemos si se nos pasa algún limit, para darle un nuevo valor, o dejar el
-            if parse_limit[0] == "limit":   #predeterminado.
-                limit = int(parse_limit[1])
+            prueba_limit = parametros.split("=") #aquí vemos si se nos pasa algún limit, para darle un nuevo valor o dejar el
+            if prueba_limit[0] == "limit":   #predeterminado.
+                limit = int(prueba_limit[1])
                 print("Limit: {}".format(limit))
         else:
             print("SIN PARAMETROS")
@@ -99,28 +102,31 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             pagina_html=self.get_main_page()
+        #Como no se nos pasa ningún recurso, mostramos por pantalla el formulario inicial.
             self.wfile.write(bytes(pagina_html, "utf8"))
         elif 'listDrugs' in self.path:
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             lista_medicamentos = []
-            resultados = self.dame_resultados_genericos(limit)
+            resultados = self.resultados_generales(limit) #llamamos a la función para obtener los resultados generales, y a partir
+            #de ahí, mediante un bucle especificamos la búsqueda.
             for resultado in resultados:
                 if ('generic_name' in resultado['openfda']):
                     lista_medicamentos.append (resultado['openfda']['generic_name'][0])
                 else:
                     lista_medicamentos.append('Desconocido')
-            pagina_html = self.dame_web (lista_medicamentos)
-
+            pagina_html = self.dame_web (lista_medicamentos) #Pasamos la información a lenguaje html y la mostramos por pantalla.
             self.wfile.write(bytes(pagina_html, "utf8"))
+
+            #Este proceso se repite prácticamente igual en listCompanies y en listWarnings.
         elif 'listCompanies' in self.path:
             self.send_response(200)
 
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             list_companies = []
-            resultados = self.dame_resultados_genericos (limit)
+            resultados = self.resultados_generales (limit)
             for resultado in resultados:
                 if ('manufacturer_name' in resultado['openfda']):
                     list_companies.append (resultado['openfda']['manufacturer_name'][0])
@@ -130,14 +136,12 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
             self.wfile.write(bytes(pagina_html, "utf8"))
         elif 'listWarnings' in self.path:
-
             self.send_response(200)
-
 
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             lista_warnings = []
-            resultados = self.dame_resultados_genericos (limit)
+            resultados = self.resultados_generales (limit)
             for resultado in resultados:
                 if ('warnings' in resultado):
                     lista_warnings.append (resultado['warnings'][0])
@@ -154,25 +158,26 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
 
             limit = 10 #establecemos límite por defecto =10
-            drug=self.path.split('=')[1]
+            drug=self.path.split('=')[1] #drug es el medicamento que se desea buscar
 
-            drugs = []
+            list_drugs = []
             conn = http.client.HTTPSConnection("api.fda.gov")
+            #realizamos una petición de la información que se nos ha pedido y la almacenamos en una lista.
             conn.request("GET", "/drug/label.json" + "?limit="+str(limit) + '&search=active_ingredient:' + drug)
             r1 = conn.getresponse()
             resp_des = r1.read().decode("utf8")
             resp = json.loads(resp_des)
-            resultado_busqueda = resp['results']
+            resultado_busqueda = resp['results'] #mediante un bucle vamos añadiendo la información a una lista.
             for resultado in resultado_busqueda:
                 if ('generic_name' in resultado['openfda']):
-                    drugs.append(resultado['openfda']['generic_name'][0])
+                    list_drugs.append(resultado['openfda']['generic_name'][0])
                 else:
-                    drugs.append('Desconocido')
+                    list_drugs.append('Desconocido')
 
-            pagina_html = self.dame_web(drugs)
+            pagina_html = self.dame_web(list_drugs)
             self.wfile.write(bytes(pagina_html, "utf8"))
         elif 'searchCompany' in self.path:
-
+#en este caso el procedimiento es el mismo que en el caso anterior.
             self.send_response(200)
 
 
@@ -189,19 +194,20 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             res = json.loads(resp_des)
             resultado_busqueda = res['results']
 
-            for event in resultado_busqueda:
-                companies.append(event['openfda']['manufacturer_name'][0])
+            for result in resultado_busqueda:
+                companies.append(result['openfda']['manufacturer_name'][0])
             pagina_html = self.dame_web(companies)
             self.wfile.write(bytes(pagina_html, "utf8"))
-        elif 'redirect' in self.path:
+        elif 'redirect' in self.path: #en esta ocasión lo que sucede es que devolvemos al usuario a la página de inicio,
+            #donde se encuentra el formulario.
             self.send_response(301)
             self.send_header('Location', 'http://localhost:'+str(PORT))
             self.end_headers()
-        elif 'secret' in self.path:
+        elif 'secret' in self.path: #nos indica que es un URL no autorizada y devuelve el error 401.
             self.send_error(401)
             self.send_header('WWW-Authenticate', 'Basic realm="Mi servidor"')
             self.end_headers()
-        else:
+        else: #Cualquier error en el recurso lo contemplamos aquí.
             self.send_error(404)
             self.send_header('Content-type', 'text/plain; charset=utf-8')
             self.end_headers()
@@ -210,7 +216,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
 
 
-socketserver.TCPServer.allow_reuse_address= True
+socketserver.TCPServer.allow_reuse_address= True #Con esto conseguimos usar el mismo puerto sin tener que esperar.
 
 Handler = testHTTPRequestHandler
 
