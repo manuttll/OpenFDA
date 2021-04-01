@@ -60,10 +60,9 @@
 					]
 				},
 				"source": [
-					"Glucose=\"\"\n",
-					"BloodPressure=\"\""
+					"hola=\"aaaaaaale\""
 				],
-				"execution_count": 16
+				"execution_count": 50
 			},
 			{
 				"cell_type": "code",
@@ -80,28 +79,9 @@
 					"collapsed": true
 				},
 				"source": [
-					"salida=Glucose+BloodPressure"
+					"exit:\"mierda\""
 				],
-				"execution_count": 36
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					},
-					"collapsed": true
-				},
-				"source": [
-					"exit:salida"
-				],
-				"execution_count": 48
+				"execution_count": 51
 			},
 			{
 				"cell_type": "code",
