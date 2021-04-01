@@ -26,7 +26,7 @@
 			},
 			"kernelspec": {
 				"name": "synapse_pyspark",
-				"display_name": "Synapse PySpark"
+				"display_name": "python"
 			},
 			"language_info": {
 				"name": "python"
@@ -98,7 +98,7 @@
 					"collapsed": true
 				},
 				"source": [
-					""
+					"result=plus(Glucose,BloodPressure)"
 				],
 				"execution_count": null
 			}
