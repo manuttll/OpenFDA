@@ -69,21 +69,32 @@
 									"type": "NotebookReference"
 								},
 								"parameters": {
-									"Glucose": {
-										"value": {
-											"value": "@activity('Lookup1').output.firstRow.Glucose",
-											"type": "Expression"
-										},
-										"type": "string"
-									},
 									"BloodPressure": {
 										"value": {
 											"value": "@activity('Lookup1').output.firstRow.BloodPressure",
 											"type": "Expression"
 										},
 										"type": "string"
+									},
+									"Glucose": {
+										"value": {
+											"value": "@activity('Lookup1').output.firstRow.Glucose",
+											"type": "Expression"
+										},
+										"type": "string"
 									}
 								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Wait_true",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
 							}
 						}
 					]
