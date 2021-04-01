@@ -60,7 +60,26 @@
 					"glucose=\"\"\n",
 					"bmi=\"\""
 				],
-				"execution_count": 1
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"plus= glucose+bmi"
+				],
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
