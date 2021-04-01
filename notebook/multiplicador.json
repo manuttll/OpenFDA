@@ -82,7 +82,7 @@
 				},
 				"source": [
 					"plus=Glucose+BloodPressure\n",
-					""
+					"print(plus)"
 				],
 				"execution_count": 4
 			},
