@@ -1,0 +1,61 @@
+{
+	"name": "DelimitedText1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "pima_indian_diabetes.csv",
+				"folderPath": "PRUEBA",
+				"container": "pmd-spark"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Pregnancies",
+				"type": "String"
+			},
+			{
+				"name": "Glucose",
+				"type": "String"
+			},
+			{
+				"name": "BloodPressure",
+				"type": "String"
+			},
+			{
+				"name": "SkinThickness",
+				"type": "String"
+			},
+			{
+				"name": "Insulin",
+				"type": "String"
+			},
+			{
+				"name": "BMI",
+				"type": "String"
+			},
+			{
+				"name": "DiabetesPedigreeFunction",
+				"type": "String"
+			},
+			{
+				"name": "Age",
+				"type": "String"
+			},
+			{
+				"name": "Outcome",
+				"type": "String"
+			}
+		]
+	}
+}

@@ -29,12 +29,13 @@
 					"dataset": {
 						"referenceName": "DelimitedText1",
 						"type": "DatasetReference"
-					}
+					},
+					"firstRowOnly": true
 				}
 			},
 			{
-				"name": "ForEach1",
-				"type": "ForEach",
+				"name": "If Condition1",
+				"type": "IfCondition",
 				"dependsOn": [
 					{
 						"activity": "Lookup1",
@@ -43,7 +44,50 @@
 						]
 					}
 				],
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(\nactivity('Lookup1').output.firstRow.Glucose,\nactivity('Lookup1').output.firstRow.BloodPressure\n)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Notebook1",
+							"type": "SynapseNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebook": {
+									"referenceName": "multiplicador",
+									"type": "NotebookReference"
+								},
+								"parameters": {
+									"Glucose": {
+										"value": {
+											"value": "@activity('Lookup1').output.firstRow.Glucose",
+											"type": "Expression"
+										},
+										"type": "string"
+									},
+									"BloodPressure": {
+										"value": {
+											"value": "@activity('Lookup1').output.firstRow.BloodPressure",
+											"type": "Expression"
+										},
+										"type": "string"
+									}
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"annotations": []
