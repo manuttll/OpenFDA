@@ -26,7 +26,7 @@
 			},
 			"kernelspec": {
 				"name": "synapse_pyspark",
-				"display_name": "python"
+				"display_name": "Synapse PySpark"
 			},
 			"language_info": {
 				"name": "python"
@@ -58,9 +58,10 @@
 				},
 				"source": [
 					"Glucose=\"\"\n",
-					"BloodPressure=\"\""
+					"BloodPressure=\"\"\n",
+					"plus=\"\""
 				],
-				"execution_count": 1
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -77,11 +78,10 @@
 					"collapsed": true
 				},
 				"source": [
-					"def plus(Glucose,BloodPressure):\n",
-					"    plus=Glucose+BloodPressure\n",
-					"    return plus"
+					"plus=Glucose+BloodPressure\n",
+					""
 				],
-				"execution_count": 2
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -98,7 +98,7 @@
 					"collapsed": true
 				},
 				"source": [
-					"result=plus(Glucose,BloodPressure)"
+					""
 				],
 				"execution_count": null
 			}
