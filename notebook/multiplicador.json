@@ -60,7 +60,7 @@
 					"Glucose=\"\"\n",
 					"BloodPressure=\"\""
 				],
-				"execution_count": 5
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
@@ -77,9 +77,11 @@
 					"collapsed": true
 				},
 				"source": [
-					"plus= Glucose+BloodPressure"
+					"def plus(Glucose,BloodPressure):\n",
+					"    plus=Glucose+BloodPressure\n",
+					"    return plus"
 				],
-				"execution_count": 6
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
