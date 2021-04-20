@@ -30,12 +30,12 @@
 						"referenceName": "DelimitedText1",
 						"type": "DatasetReference"
 					},
-					"firstRowOnly": true
+					"firstRowOnly": false
 				}
 			},
 			{
-				"name": "If Condition1",
-				"type": "IfCondition",
+				"name": "Filter1",
+				"type": "Filter",
 				"dependsOn": [
 					{
 						"activity": "Lookup1",
@@ -46,58 +46,14 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"expression": {
-						"value": "@equals(\nactivity('Lookup1').output.firstRow.Glucose,\nactivity('Lookup1').output.firstRow.BloodPressure\n)",
+					"items": {
+						"value": "@activity('Lookup1').output",
 						"type": "Expression"
 					},
-					"ifFalseActivities": [
-						{
-							"name": "Notebook1",
-							"type": "SynapseNotebook",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"notebook": {
-									"referenceName": "multiplicador",
-									"type": "NotebookReference"
-								},
-								"parameters": {
-									"BloodPressure": {
-										"value": {
-											"value": "@activity('Lookup1').output.firstRow.BloodPressure",
-											"type": "Expression"
-										},
-										"type": "string"
-									},
-									"Glucose": {
-										"value": {
-											"value": "@activity('Lookup1').output.firstRow.Glucose",
-											"type": "Expression"
-										},
-										"type": "string"
-									}
-								}
-							}
-						}
-					],
-					"ifTrueActivities": [
-						{
-							"name": "Wait_true",
-							"type": "Wait",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
-						}
-					]
+					"condition": {
+						"value": "@greater(item().value.Glucose, 196)",
+						"type": "Expression"
+					}
 				}
 			}
 		],
