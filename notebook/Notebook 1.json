@@ -62,14 +62,14 @@
 					")\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"data=df"
 				],
-				"execution_count": 2
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -99,7 +99,7 @@
 					"from pyspark.sql.functions import *\n",
 					"from pyspark.sql.types import *"
 				],
-				"execution_count": 3
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -109,7 +109,7 @@
 					"data=data.replace(\"97\", None)\n",
 					"data=data.replace(\"9999-99-99\" , None)"
 				],
-				"execution_count": 4
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -117,7 +117,7 @@
 					"#seleccionamos solo los pacientes que han sido diagnosticados como positivos en COVID\n",
 					"data=data.filter(data.covid_res==1)"
 				],
-				"execution_count": 5
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -128,14 +128,14 @@
 					"    col(\"date_died\").isNotNull() | (col(\"icu\")==1), 1\n",
 					").otherwise(2)"
 				],
-				"execution_count": 6
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"data=data.withColumn(\"icu_or_died\", icu_or_died)"
 				],
-				"execution_count": 7
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -143,7 +143,7 @@
 					"#eliminamos las columnas \"id\", \"contact_other_covid\",\"pregnancy\", \"intubed\", \"date_died\"\n",
 					"data=data.drop(\"id\",\"contact_other_covid\", \"pregnancy\", \"intubed\", \"date_died\", \"icu\")"
 				],
-				"execution_count": 8
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -152,7 +152,7 @@
 					"data=data.select(\"sex\",\"pneumonia\",\"age\",\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"tobacco\", 'other_disease', \"icu_or_died\")\n",
 					"data=data.dropna()"
 				],
-				"execution_count": 9
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -162,7 +162,7 @@
 					"df_nouci= (data.filter(data.icu_or_died==2)).toPandas()\n",
 					"#cambio de valor a tipo int"
 				],
-				"execution_count": 10
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -171,7 +171,7 @@
 					"df_nouci_resampled = resample(df_nouci, replace=False, n_samples=len(df_uci), random_state=123)\n",
 					"data_resampled=pd.concat([df_nouci_resampled,df_uci])"
 				],
-				"execution_count": 11
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -179,19 +179,16 @@
 					"#cambiamos los 2 por 0 para facilitarnos la creacion de la nueva variable\n",
 					"data_resampled= data_resampled.replace({2: 0})"
 				],
-				"execution_count": 12
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
-				"metadata": {
-					"outputCollapsed": true
-				},
 				"source": [
 					"# Creamos una nueva variable que será el numero total de patologias asociadas al paciente: \"n_total_diseases\"\n",
 					"col_list= [\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"other_disease\"]\n",
 					"data_resampled[\"n_total_diseases\"] = data_resampled[col_list].sum(axis=1)"
 				],
-				"execution_count": 13
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
@@ -202,25 +199,41 @@
 					"# train y test\n",
 					"X_train, X_test, Y_train, Y_test= train_test_split(X,Y,test_size=0.25,stratify=Y)"
 				],
-				"execution_count": 14
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					""
-				],
-				"execution_count": 15
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					""
-				],
 				"execution_count": 16
 			},
 			{
+				"cell_type": "markdown",
+				"source": [
+					"## ÁRBOL\n",
+					""
+				]
+			},
+			{
 				"cell_type": "code",
 				"source": [
+					"max_depth = np.arange(1, 16)\n",
+					"min_samples_leaf = [50, 100, 200]\n",
+					"\n",
+					"# GridSearchCV para buscar los mejores parámetros\n",
+					"param_grid = { 'criterion':['gini','entropy'],'max_depth': max_depth}\n",
+					"\n",
+					"# Creamos un árbol de clasificación\n",
+					"dtree_model=tree.DecisionTreeClassifier()\n",
+					"\n",
+					"# Usamos gridsearch para evluar los parámetros\n",
+					"dtree_model = GridSearchCV(dtree_model, param_grid, cv=3, scoring= \"balanced_accuracy\", return_train_score=True)\n",
+					"\n",
+					"dtree_model=dtree_model.fit(X_train, Y_train)\n",
+					"\n",
+					"\n",
+					"#EVALUAMOS\n",
+					"my_model = dtree_model.best_estimator_\n",
+					"my_tree=my_model.fit(X_train, Y_train)\n",
+					"#Predeccimos usando X_test\n",
+					"y_predicted = my_model.predict(X_test)\n",
+					"# Resultados\n",
+					"print(accuracy_score(Y_test, y_predicted))\n",
+					"print(confusion_matrix(Y_test, y_predicted))\n",
 					""
 				],
 				"execution_count": 17
@@ -228,37 +241,90 @@
 			{
 				"cell_type": "code",
 				"source": [
-					""
+					"#importancia de caracteisticas\n",
+					"from matplotlib import pyplot\n",
+					"importance=my_tree.feature_importances_\n",
+					"pyplot.bar([x for x in range(len(importance))], importance)\n",
+					"pyplot.show()"
 				],
 				"execution_count": 18
 			},
 			{
+				"cell_type": "markdown",
+				"source": [
+					"## Random Forest\n",
+					""
+				]
+			},
+			{
 				"cell_type": "code",
 				"source": [
-					""
+					"from sklearn.ensemble import RandomForestClassifier\n",
+					"\n",
+					"\n",
+					"# GridSearchCV para buscar los mejores parámetros\n",
+					"param_grid = { 'criterion':['gini','entropy'],'max_depth': np.arange(3, 15)}\n",
+					"\n",
+					"# RandomForest\n",
+					"forest_model = RandomForestClassifier(n_estimators=10)\n",
+					"\n",
+					"# Usamos gridsearch para evluar los parámetros\n",
+					"forest_model = GridSearchCV(forest_model, param_grid, cv=3, scoring= \"balanced_accuracy\", return_train_score=True)\n",
+					"\n",
+					"# \n",
+					"forest_model=forest_model.fit(X_train, Y_train)\n",
+					"\n",
+					"#EVALUAMOS\n",
+					"mymodel = forest_model.best_estimator_\n",
+					"my_forest=mymodel.fit(X_train, Y_train)\n",
+					"#Predeccimos usando X_test\n",
+					"y_predicted = mymodel.predict(X_test)\n",
+					"# Resultados\n",
+					"print(accuracy_score(Y_test, y_predicted))\n",
+					"print(confusion_matrix(Y_test, y_predicted))"
 				],
 				"execution_count": 19
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					""
+					"#importancia de caracteristicas\n",
+					"from matplotlib import pyplot\n",
+					"importance=mymodel.feature_importances_\n",
+					"pyplot.bar([x for x in range(len(importance))], importance)\n",
+					"pyplot.show()"
 				],
 				"execution_count": 20
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					""
+					"# XGBoost\n",
+					"import xgboost as xgb\n",
+					"from sklearn import metrics\n",
+					"from sklearn.metrics import classification_report\n",
+					"\n",
+					"\n",
+					"# Parameter Tuning\n",
+					"model_xgbm = xgb.XGBClassifier()\n",
+					"param_dist = {\"max_depth\": [30,50],\n",
+					"              \"min_child_weight\" : [6,9],\n",
+					"              \"n_estimators\": [200],\n",
+					"              \"learning_rate\": [ 0.11,0.16 ]}\n",
+					"grid_search = GridSearchCV(model_xgbm, param_grid=param_dist, cv = 3, \n",
+					"                                   verbose=10, n_jobs=-1)\n",
+					"grid_search.fit(X_train, Y_train)\n",
+					"\n",
+					"print(grid_search.best_estimator_)\n",
+					"model_xgbm = grid_search.best_estimator_\n",
+					"\n",
+					"model_xgbm.fit(X_train,Y_train)\n",
+					"\n",
+					"y_predicted = model_xgbm.predict(X_test)\n",
+					"\n",
+					"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))"
 				],
-				"execution_count": 21
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					""
-				],
-				"execution_count": 22
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -270,9 +336,47 @@
 			{
 				"cell_type": "code",
 				"source": [
-					""
+					"#LightGBM\n",
+					"import lightgbm as lgb\n",
+					"from sklearn import metrics\n",
+					"\n",
+					"lg = lgb.LGBMClassifier(silent=False)\n",
+					"param_dist = {\"max_depth\": [10,25,50],\n",
+					"              \"learning_rate\" : [0.01,0.05],\n",
+					"              \"num_leaves\": [150,300,900],\n",
+					"              \"n_estimators\": [100,200]\n",
+					"             }\n",
+					"\n",
+					"grid_search = GridSearchCV(lg, n_jobs=-1, param_grid=param_dist, cv = 3, scoring=\"balanced_accuracy\", verbose=5)\n",
+					"grid_search.fit(X_train,Y_train)\n",
+					"\n",
+					"lgb_model=grid_search.best_estimator_\n",
+					"lgb_model.fit(X_train,Y_train)\n",
+					"\n",
+					"#evaluamos\n",
+					"y_predicted = lgb_model.predict(X_test)\n",
+					"\n",
+					"\n",
+					"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))\n",
+					"print(classification_report(Y_test, y_predicted))"
 				],
 				"execution_count": 24
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Importancia caracteristicas lgb\n",
+					"pyplot.bar(range(len(lgb_model.feature_importances_)), lgb_model.feature_importances_)\n",
+					"pyplot.show()"
+				],
+				"execution_count": 25
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				],
+				"execution_count": 26
 			}
 		]
 	}
