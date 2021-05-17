@@ -160,7 +160,9 @@
 					"#paso a pandas (dataframe)\n",
 					"df_uci= data.filter(data.icu_or_died==1).toPandas()\n",
 					"df_nouci= (data.filter(data.icu_or_died==2)).toPandas()\n",
-					"#cambio de valor a tipo int"
+					"#cambio de valor a tipo int\n",
+					"df_uci=df_uci.astype(int)\n",
+					"df_nouci=df_nouci.astype(int)"
 				],
 				"execution_count": 12
 			},
@@ -236,7 +238,7 @@
 					"print(confusion_matrix(Y_test, y_predicted))\n",
 					""
 				],
-				"execution_count": 17
+				"execution_count": 18
 			},
 			{
 				"cell_type": "code",
@@ -247,7 +249,7 @@
 					"pyplot.bar([x for x in range(len(importance))], importance)\n",
 					"pyplot.show()"
 				],
-				"execution_count": 18
+				"execution_count": 19
 			},
 			{
 				"cell_type": "markdown",
@@ -283,7 +285,7 @@
 					"print(accuracy_score(Y_test, y_predicted))\n",
 					"print(confusion_matrix(Y_test, y_predicted))"
 				],
-				"execution_count": 19
+				"execution_count": 21
 			},
 			{
 				"cell_type": "code",
@@ -294,23 +296,24 @@
 					"pyplot.bar([x for x in range(len(importance))], importance)\n",
 					"pyplot.show()"
 				],
-				"execution_count": 20
+				"execution_count": 22
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"# XGBoost\n",
-					"import xgboost as xgb\n",
-					"from sklearn import metrics\n",
-					"from sklearn.metrics import classification_report\n",
-					"\n",
-					"\n",
+					"import xgboost as xgb"
+				],
+				"execution_count": 37
+			},
+			{
+				"cell_type": "code",
+				"source": [
 					"# Parameter Tuning\n",
 					"model_xgbm = xgb.XGBClassifier()\n",
 					"param_dist = {\"max_depth\": [30,50],\n",
 					"              \"min_child_weight\" : [6,9],\n",
 					"              \"n_estimators\": [200],\n",
-					"              \"learning_rate\": [ 0.11,0.16 ]}\n",
+					"              \"learning_rate\": [ 0.05,0.1]}\n",
 					"grid_search = GridSearchCV(model_xgbm, param_grid=param_dist, cv = 3, \n",
 					"                                   verbose=10, n_jobs=-1)\n",
 					"grid_search.fit(X_train, Y_train)\n",
@@ -324,14 +327,14 @@
 					"\n",
 					"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))"
 				],
-				"execution_count": 27
+				"execution_count": 36
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					""
+					"import lightgbm as lgb"
 				],
-				"execution_count": 23
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -360,7 +363,7 @@
 					"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))\n",
 					"print(classification_report(Y_test, y_predicted))"
 				],
-				"execution_count": 24
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -370,13 +373,6 @@
 					"pyplot.show()"
 				],
 				"execution_count": 25
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					""
-				],
-				"execution_count": 26
 			}
 		]
 	}
