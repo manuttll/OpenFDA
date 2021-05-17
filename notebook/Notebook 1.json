@@ -62,14 +62,14 @@
 					")\n",
 					""
 				],
-				"execution_count": 3
+				"execution_count": 30
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"data=df"
 				],
-				"execution_count": 4
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -99,7 +99,7 @@
 					"from pyspark.sql.functions import *\n",
 					"from pyspark.sql.types import *"
 				],
-				"execution_count": 5
+				"execution_count": 32
 			},
 			{
 				"cell_type": "code",
@@ -109,7 +109,7 @@
 					"data=data.replace(\"97\", None)\n",
 					"data=data.replace(\"9999-99-99\" , None)"
 				],
-				"execution_count": 6
+				"execution_count": 33
 			},
 			{
 				"cell_type": "code",
@@ -117,7 +117,7 @@
 					"#seleccionamos solo los pacientes que han sido diagnosticados como positivos en COVID\n",
 					"data=data.filter(data.covid_res==1)"
 				],
-				"execution_count": 7
+				"execution_count": 34
 			},
 			{
 				"cell_type": "code",
@@ -128,14 +128,14 @@
 					"    col(\"date_died\").isNotNull() | (col(\"icu\")==1), 1\n",
 					").otherwise(2)"
 				],
-				"execution_count": 8
+				"execution_count": 35
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"data=data.withColumn(\"icu_or_died\", icu_or_died)"
 				],
-				"execution_count": 9
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -143,7 +143,7 @@
 					"#eliminamos las columnas \"id\", \"contact_other_covid\",\"pregnancy\", \"intubed\", \"date_died\"\n",
 					"data=data.drop(\"id\",\"contact_other_covid\", \"pregnancy\", \"intubed\", \"date_died\", \"icu\")"
 				],
-				"execution_count": 10
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -152,7 +152,7 @@
 					"data=data.select(\"sex\",\"pneumonia\",\"age\",\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"tobacco\", 'other_disease', \"icu_or_died\")\n",
 					"data=data.dropna()"
 				],
-				"execution_count": 11
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -164,7 +164,7 @@
 					"df_uci=df_uci.astype(int)\n",
 					"df_nouci=df_nouci.astype(int)"
 				],
-				"execution_count": 12
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -173,7 +173,7 @@
 					"df_nouci_resampled = resample(df_nouci, replace=False, n_samples=len(df_uci), random_state=123)\n",
 					"data_resampled=pd.concat([df_nouci_resampled,df_uci])"
 				],
-				"execution_count": 13
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -181,7 +181,7 @@
 					"#cambiamos los 2 por 0 para facilitarnos la creacion de la nueva variable\n",
 					"data_resampled= data_resampled.replace({2: 0})"
 				],
-				"execution_count": 14
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -190,7 +190,7 @@
 					"col_list= [\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"other_disease\"]\n",
 					"data_resampled[\"n_total_diseases\"] = data_resampled[col_list].sum(axis=1)"
 				],
-				"execution_count": 15
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -201,7 +201,7 @@
 					"# train y test\n",
 					"X_train, X_test, Y_train, Y_test= train_test_split(X,Y,test_size=0.25,stratify=Y)"
 				],
-				"execution_count": 16
+				"execution_count": null
 			},
 			{
 				"cell_type": "markdown",
@@ -238,7 +238,7 @@
 					"print(confusion_matrix(Y_test, y_predicted))\n",
 					""
 				],
-				"execution_count": 18
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -249,7 +249,7 @@
 					"pyplot.bar([x for x in range(len(importance))], importance)\n",
 					"pyplot.show()"
 				],
-				"execution_count": 19
+				"execution_count": null
 			},
 			{
 				"cell_type": "markdown",
@@ -285,7 +285,7 @@
 					"print(accuracy_score(Y_test, y_predicted))\n",
 					"print(confusion_matrix(Y_test, y_predicted))"
 				],
-				"execution_count": 21
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -296,14 +296,14 @@
 					"pyplot.bar([x for x in range(len(importance))], importance)\n",
 					"pyplot.show()"
 				],
-				"execution_count": 22
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"import xgboost as xgb"
+					"!pip install xgboost"
 				],
-				"execution_count": 37
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -314,11 +314,9 @@
 					"              \"min_child_weight\" : [6,9],\n",
 					"              \"n_estimators\": [200],\n",
 					"              \"learning_rate\": [ 0.05,0.1]}\n",
-					"grid_search = GridSearchCV(model_xgbm, param_grid=param_dist, cv = 3, \n",
+					"grid_search = GridSearchCV(model_xgbm, param_grid=param_dist, \n",
 					"                                   verbose=10, n_jobs=-1)\n",
-					"grid_search.fit(X_train, Y_train)\n",
 					"\n",
-					"print(grid_search.best_estimator_)\n",
 					"model_xgbm = grid_search.best_estimator_\n",
 					"\n",
 					"model_xgbm.fit(X_train,Y_train)\n",
@@ -327,14 +325,14 @@
 					"\n",
 					"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))"
 				],
-				"execution_count": 36
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"import lightgbm as lgb"
 				],
-				"execution_count": 31
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -363,7 +361,7 @@
 					"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))\n",
 					"print(classification_report(Y_test, y_predicted))"
 				],
-				"execution_count": 2
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -372,7 +370,7 @@
 					"pyplot.bar(range(len(lgb_model.feature_importances_)), lgb_model.feature_importances_)\n",
 					"pyplot.show()"
 				],
-				"execution_count": 25
+				"execution_count": null
 			}
 		]
 	}
