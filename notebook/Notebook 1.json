@@ -1,0 +1,257 @@
+{
+	"name": "Notebook 1",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "PMDApacheSpark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/4e9b48eb-8028-4592-8699-2b160d4fc964/resourceGroups/PMD/providers/Microsoft.Synapse/workspaces/pmd-workspace/bigDataPools/PMDApacheSpark",
+				"name": "PMDApacheSpark",
+				"type": "Spark",
+				"endpoint": "https://pmd-workspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/PMDApacheSpark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"%%pyspark\n",
+					"blob_account_name = \"pmddatalake\"\n",
+					"blob_container_name = \"pmd-spark\"\n",
+					"from pyspark.sql import SparkSession\n",
+					"\n",
+					"sc = SparkSession.builder.getOrCreate()\n",
+					"token_library = sc._jvm.com.microsoft.azure.synapse.tokenlibrary.TokenLibrary\n",
+					"blob_sas_token = token_library.getConnectionString(\"AzureBlobStorage1\")\n",
+					"\n",
+					"spark.conf.set(\n",
+					"    'fs.azure.sas.%s.%s.blob.core.windows.net' % (blob_container_name, blob_account_name),\n",
+					"    blob_sas_token)\n",
+					"df = spark.read.load('wasbs://pmd-spark@pmddatalake.blob.core.windows.net/project-pmd/covid.csv', format='csv'\n",
+					", header=True\n",
+					")\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"data=df"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd\n",
+					"import numpy as np\n",
+					"import matplotlib.pyplot as plt\n",
+					"from matplotlib import pyplot\n",
+					"import scipy.stats as ss\n",
+					"import seaborn as sbn\n",
+					"import sklearn\n",
+					"from sklearn.model_selection import train_test_split, cross_val_score\n",
+					"from sklearn.linear_model import LogisticRegression\n",
+					"from sklearn import linear_model\n",
+					"from sklearn import model_selection\n",
+					"from sklearn.metrics import classification_report\n",
+					"from sklearn.metrics import confusion_matrix\n",
+					"from sklearn.metrics import accuracy_score\n",
+					"from sklearn.metrics import confusion_matrix\n",
+					"from sklearn.neighbors import KNeighborsClassifier\n",
+					"from sklearn.model_selection import learning_curve, GridSearchCV\n",
+					"from sklearn.pipeline import Pipeline\n",
+					"from sklearn import preprocessing\n",
+					"from sklearn import tree\n",
+					"from sklearn.naive_bayes import GaussianNB\n",
+					"from sklearn.utils import resample\n",
+					"from pyspark.sql.functions import *\n",
+					"from pyspark.sql.types import *"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"data=data.replace(\"99\", None)\n",
+					"data=data.replace(\"98\", None)\n",
+					"data=data.replace(\"97\", None)\n",
+					"data=data.replace(\"9999-99-99\" , None)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#seleccionamos solo los pacientes que han sido diagnosticados como positivos en COVID\n",
+					"data=data.filter(data.covid_res==1)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#creamos una columna para almacenar la información de si un paciente ha muerto, ha sido ingresado en uci, o ambas\n",
+					"from pyspark.sql.functions import when\n",
+					"icu_or_died=when(\n",
+					"    col(\"date_died\").isNotNull() | (col(\"icu\")==1), 1\n",
+					").otherwise(2)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"data=data.withColumn(\"icu_or_died\", icu_or_died)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#eliminamos las columnas \"id\", \"contact_other_covid\",\"pregnancy\", \"intubed\", \"date_died\"\n",
+					"data=data.drop(\"id\",\"contact_other_covid\", \"pregnancy\", \"intubed\", \"date_died\", \"icu\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#seleccionamos las columnas que usaremos\n",
+					"data=data.select(\"sex\",\"pneumonia\",\"age\",\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"tobacco\", 'other_disease', \"icu_or_died\")\n",
+					"data=data.dropna()"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#paso a pandas (dataframe)\n",
+					"df_uci= data.filter(data.icu_or_died==1).toPandas()\n",
+					"df_nouci= (data.filter(data.icu_or_died==2)).toPandas()\n",
+					"#cambio de valor a tipo int"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#realizamos el subsampling\n",
+					"df_nouci_resampled = resample(df_nouci, replace=False, n_samples=len(df_uci), random_state=123)\n",
+					"data_resampled=pd.concat([df_nouci_resampled,df_uci])"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#cambiamos los 2 por 0 para facilitarnos la creacion de la nueva variable\n",
+					"data_resampled= data_resampled.replace({2: 0})"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Creamos una nueva variable que será el numero total de patologias asociadas al paciente: \"n_total_diseases\"\n",
+					"col_list= [\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"other_disease\"]\n",
+					"data_resampled[\"n_total_diseases\"] = data_resampled[col_list].sum(axis=1)\n",
+					"data_resampled"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#dividimos en x e y\n",
+					"X=data_resampled.drop(\"icu_or_died\",axis=1)\n",
+					"Y=data_resampled[\"icu_or_died\"]\n",
+					"# train y test\n",
+					"X_train, X_test, Y_train, Y_test= train_test_split(X,Y,test_size=0.25,stratify=Y)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			}
+		]
+	}
+}
