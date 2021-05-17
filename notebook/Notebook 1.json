@@ -62,14 +62,14 @@
 					")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"data=df"
 				],
-				"execution_count": null
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -99,7 +99,7 @@
 					"from pyspark.sql.functions import *\n",
 					"from pyspark.sql.types import *"
 				],
-				"execution_count": null
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -109,7 +109,7 @@
 					"data=data.replace(\"97\", None)\n",
 					"data=data.replace(\"9999-99-99\" , None)"
 				],
-				"execution_count": null
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -117,7 +117,7 @@
 					"#seleccionamos solo los pacientes que han sido diagnosticados como positivos en COVID\n",
 					"data=data.filter(data.covid_res==1)"
 				],
-				"execution_count": null
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -128,14 +128,14 @@
 					"    col(\"date_died\").isNotNull() | (col(\"icu\")==1), 1\n",
 					").otherwise(2)"
 				],
-				"execution_count": null
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"data=data.withColumn(\"icu_or_died\", icu_or_died)"
 				],
-				"execution_count": null
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -143,7 +143,7 @@
 					"#eliminamos las columnas \"id\", \"contact_other_covid\",\"pregnancy\", \"intubed\", \"date_died\"\n",
 					"data=data.drop(\"id\",\"contact_other_covid\", \"pregnancy\", \"intubed\", \"date_died\", \"icu\")"
 				],
-				"execution_count": null
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -152,7 +152,7 @@
 					"data=data.select(\"sex\",\"pneumonia\",\"age\",\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"tobacco\", 'other_disease', \"icu_or_died\")\n",
 					"data=data.dropna()"
 				],
-				"execution_count": null
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -162,7 +162,7 @@
 					"df_nouci= (data.filter(data.icu_or_died==2)).toPandas()\n",
 					"#cambio de valor a tipo int"
 				],
-				"execution_count": null
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -171,7 +171,7 @@
 					"df_nouci_resampled = resample(df_nouci, replace=False, n_samples=len(df_uci), random_state=123)\n",
 					"data_resampled=pd.concat([df_nouci_resampled,df_uci])"
 				],
-				"execution_count": null
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -179,17 +179,19 @@
 					"#cambiamos los 2 por 0 para facilitarnos la creacion de la nueva variable\n",
 					"data_resampled= data_resampled.replace({2: 0})"
 				],
-				"execution_count": null
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"outputCollapsed": true
+				},
 				"source": [
 					"# Creamos una nueva variable que será el numero total de patologias asociadas al paciente: \"n_total_diseases\"\n",
 					"col_list= [\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"other_disease\"]\n",
-					"data_resampled[\"n_total_diseases\"] = data_resampled[col_list].sum(axis=1)\n",
-					"data_resampled"
+					"data_resampled[\"n_total_diseases\"] = data_resampled[col_list].sum(axis=1)"
 				],
-				"execution_count": null
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -200,57 +202,77 @@
 					"# train y test\n",
 					"X_train, X_test, Y_train, Y_test= train_test_split(X,Y,test_size=0.25,stratify=Y)"
 				],
-				"execution_count": null
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 16
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 17
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 18
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 19
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 20
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 21
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 22
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 23
 			},
 			{
 				"cell_type": "code",
-				"source": [],
-				"execution_count": null
+				"source": [
+					""
+				],
+				"execution_count": 24
 			}
 		]
 	}
