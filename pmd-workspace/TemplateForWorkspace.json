@@ -1,0 +1,628 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Nombre del área de trabajo",
+			"defaultValue": "pmd-workspace"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"AzureBlobStorage1\""
+		},
+		"AzureBlobStorage2_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"AzureBlobStorage2\""
+		},
+		"pmd-workspace-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"pmd-workspace-WorkspaceDefaultSqlServer\""
+		},
+		"pmd-workspace-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://pmddatalake.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/DelimitedText1')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "pima_indian_diabetes.csv",
+						"folderPath": "PRUEBA",
+						"container": "pmd-spark"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Pregnancies",
+						"type": "String"
+					},
+					{
+						"name": "Glucose",
+						"type": "String"
+					},
+					{
+						"name": "BloodPressure",
+						"type": "String"
+					},
+					{
+						"name": "SkinThickness",
+						"type": "String"
+					},
+					{
+						"name": "Insulin",
+						"type": "String"
+					},
+					{
+						"name": "BMI",
+						"type": "String"
+					},
+					{
+						"name": "DiabetesPedigreeFunction",
+						"type": "String"
+					},
+					{
+						"name": "Age",
+						"type": "String"
+					},
+					{
+						"name": "Outcome",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureBlobStorage1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureBlobStorage2')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorage2_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/pmd-workspace-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('pmd-workspace-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/pmd-workspace-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('pmd-workspace-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Proyecto-pmd-azure')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "PMDApacheSpark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/4e9b48eb-8028-4592-8699-2b160d4fc964/resourceGroups/PMD/providers/Microsoft.Synapse/workspaces/pmd-workspace/bigDataPools/PMDApacheSpark",
+						"name": "PMDApacheSpark",
+						"type": "Spark",
+						"endpoint": "https://pmd-workspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/PMDApacheSpark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "2.4",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28,
+						"extraHeader": {},
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"%%pyspark\n",
+							"blob_account_name = \"pmddatalake\"\n",
+							"blob_container_name = \"pmd-spark\"\n",
+							"from pyspark.sql import SparkSession\n",
+							"\n",
+							"sc = SparkSession.builder.getOrCreate()\n",
+							"token_library = sc._jvm.com.microsoft.azure.synapse.tokenlibrary.TokenLibrary\n",
+							"blob_sas_token = token_library.getConnectionString(\"AzureBlobStorage1\")\n",
+							"\n",
+							"spark.conf.set(\n",
+							"    'fs.azure.sas.%s.%s.blob.core.windows.net' % (blob_container_name, blob_account_name),\n",
+							"    blob_sas_token)\n",
+							"df = spark.read.load('wasbs://pmd-spark@pmddatalake.blob.core.windows.net/project-pmd/covid.csv', format='csv'\n",
+							", header=True\n",
+							")\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 30
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"data=df"
+						],
+						"outputs": [],
+						"execution_count": 31
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"import pandas as pd\n",
+							"import numpy as np\n",
+							"import matplotlib.pyplot as plt\n",
+							"from matplotlib import pyplot\n",
+							"import scipy.stats as ss\n",
+							"import seaborn as sbn\n",
+							"import sklearn\n",
+							"from sklearn.model_selection import train_test_split, cross_val_score\n",
+							"from sklearn.linear_model import LogisticRegression\n",
+							"from sklearn import linear_model\n",
+							"from sklearn import model_selection\n",
+							"from sklearn.metrics import classification_report\n",
+							"from sklearn.metrics import confusion_matrix\n",
+							"from sklearn.metrics import accuracy_score\n",
+							"from sklearn.metrics import confusion_matrix\n",
+							"from sklearn.neighbors import KNeighborsClassifier\n",
+							"from sklearn.model_selection import learning_curve, GridSearchCV\n",
+							"from sklearn.pipeline import Pipeline\n",
+							"from sklearn import preprocessing\n",
+							"from sklearn import tree\n",
+							"from sklearn.naive_bayes import GaussianNB\n",
+							"from sklearn.utils import resample\n",
+							"from pyspark.sql.functions import *\n",
+							"from pyspark.sql.types import *"
+						],
+						"outputs": [],
+						"execution_count": 32
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"data=data.replace(\"99\", None)\n",
+							"data=data.replace(\"98\", None)\n",
+							"data=data.replace(\"97\", None)\n",
+							"data=data.replace(\"9999-99-99\" , None)"
+						],
+						"outputs": [],
+						"execution_count": 33
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#seleccionamos solo los pacientes que han sido diagnosticados como positivos en COVID\n",
+							"data=data.filter(data.covid_res==1)"
+						],
+						"outputs": [],
+						"execution_count": 34
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#creamos una columna para almacenar la información de si un paciente ha muerto, ha sido ingresado en uci, o ambas\n",
+							"from pyspark.sql.functions import when\n",
+							"icu_or_died=when(\n",
+							"    col(\"date_died\").isNotNull() | (col(\"icu\")==1), 1\n",
+							").otherwise(2)"
+						],
+						"outputs": [],
+						"execution_count": 35
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"data=data.withColumn(\"icu_or_died\", icu_or_died)"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#eliminamos las columnas \"id\", \"contact_other_covid\",\"pregnancy\", \"intubed\", \"date_died\"\n",
+							"data=data.drop(\"id\",\"contact_other_covid\", \"pregnancy\", \"intubed\", \"date_died\", \"icu\")"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#seleccionamos las columnas que usaremos\n",
+							"data=data.select(\"sex\",\"pneumonia\",\"age\",\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"tobacco\", 'other_disease', \"icu_or_died\")\n",
+							"data=data.dropna()"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#paso a pandas (dataframe)\n",
+							"df_uci= data.filter(data.icu_or_died==1).toPandas()\n",
+							"df_nouci= (data.filter(data.icu_or_died==2)).toPandas()\n",
+							"#cambio de valor a tipo int\n",
+							"df_uci=df_uci.astype(int)\n",
+							"df_nouci=df_nouci.astype(int)"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#realizamos el subsampling\n",
+							"df_nouci_resampled = resample(df_nouci, replace=False, n_samples=len(df_uci), random_state=123)\n",
+							"data_resampled=pd.concat([df_nouci_resampled,df_uci])"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#cambiamos los 2 por 0 para facilitarnos la creacion de la nueva variable\n",
+							"data_resampled= data_resampled.replace({2: 0})"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"# Creamos una nueva variable que será el numero total de patologias asociadas al paciente: \"n_total_diseases\"\n",
+							"col_list= [\"diabetes\",\"copd\",\"asthma\",\"inmsupr\",\"hypertension\", \"cardiovascular\", \"obesity\", \"renal_chronic\", \"other_disease\"]\n",
+							"data_resampled[\"n_total_diseases\"] = data_resampled[col_list].sum(axis=1)"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#dividimos en x e y\n",
+							"X=data_resampled.drop(\"icu_or_died\",axis=1)\n",
+							"Y=data_resampled[\"icu_or_died\"]\n",
+							"# train y test\n",
+							"X_train, X_test, Y_train, Y_test= train_test_split(X,Y,test_size=0.25,stratify=Y)"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "markdown",
+						"metadata": {},
+						"source": [
+							"## ÁRBOL\n",
+							""
+						]
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"max_depth = np.arange(1, 16)\n",
+							"min_samples_leaf = [50, 100, 200]\n",
+							"\n",
+							"# GridSearchCV para buscar los mejores parámetros\n",
+							"param_grid = { 'criterion':['gini','entropy'],'max_depth': max_depth}\n",
+							"\n",
+							"# Creamos un árbol de clasificación\n",
+							"dtree_model=tree.DecisionTreeClassifier()\n",
+							"\n",
+							"# Usamos gridsearch para evluar los parámetros\n",
+							"dtree_model = GridSearchCV(dtree_model, param_grid, cv=3, scoring= \"balanced_accuracy\", return_train_score=True)\n",
+							"\n",
+							"dtree_model=dtree_model.fit(X_train, Y_train)\n",
+							"\n",
+							"\n",
+							"#EVALUAMOS\n",
+							"my_model = dtree_model.best_estimator_\n",
+							"my_tree=my_model.fit(X_train, Y_train)\n",
+							"#Predeccimos usando X_test\n",
+							"y_predicted = my_model.predict(X_test)\n",
+							"# Resultados\n",
+							"print(accuracy_score(Y_test, y_predicted))\n",
+							"print(confusion_matrix(Y_test, y_predicted))\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#importancia de caracteisticas\n",
+							"from matplotlib import pyplot\n",
+							"importance=my_tree.feature_importances_\n",
+							"pyplot.bar([x for x in range(len(importance))], importance)\n",
+							"pyplot.show()"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "markdown",
+						"metadata": {},
+						"source": [
+							"## Random Forest\n",
+							""
+						]
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"from sklearn.ensemble import RandomForestClassifier\n",
+							"\n",
+							"\n",
+							"# GridSearchCV para buscar los mejores parámetros\n",
+							"param_grid = { 'criterion':['gini','entropy'],'max_depth': np.arange(3, 15)}\n",
+							"\n",
+							"# RandomForest\n",
+							"forest_model = RandomForestClassifier(n_estimators=10)\n",
+							"\n",
+							"# Usamos gridsearch para evluar los parámetros\n",
+							"forest_model = GridSearchCV(forest_model, param_grid, cv=3, scoring= \"balanced_accuracy\", return_train_score=True)\n",
+							"\n",
+							"# \n",
+							"forest_model=forest_model.fit(X_train, Y_train)\n",
+							"\n",
+							"#EVALUAMOS\n",
+							"mymodel = forest_model.best_estimator_\n",
+							"my_forest=mymodel.fit(X_train, Y_train)\n",
+							"#Predeccimos usando X_test\n",
+							"y_predicted = mymodel.predict(X_test)\n",
+							"# Resultados\n",
+							"print(accuracy_score(Y_test, y_predicted))\n",
+							"print(confusion_matrix(Y_test, y_predicted))"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#importancia de caracteristicas\n",
+							"from matplotlib import pyplot\n",
+							"importance=mymodel.feature_importances_\n",
+							"pyplot.bar([x for x in range(len(importance))], importance)\n",
+							"pyplot.show()"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"import xgboost as xgb"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"# Parameter Tuning\n",
+							"model_xgbm = xgb.XGBClassifier()\n",
+							"param_dist = {\"max_depth\": [30,50],\n",
+							"              \"min_child_weight\" : [6,9],\n",
+							"              \"n_estimators\": [200],\n",
+							"              \"learning_rate\": [ 0.05,0.1]}\n",
+							"grid_search = GridSearchCV(model_xgbm, param_grid=param_dist, \n",
+							"                                   verbose=10, n_jobs=-1)\n",
+							"\n",
+							"model_xgbm = grid_search.best_estimator_\n",
+							"\n",
+							"model_xgbm.fit(X_train,Y_train)\n",
+							"\n",
+							"y_predicted = model_xgbm.predict(X_test)\n",
+							"\n",
+							"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"#LightGBM\n",
+							"import lightgbm as lgb\n",
+							"from sklearn import metrics\n",
+							"\n",
+							"lg = lgb.LGBMClassifier(silent=False)\n",
+							"param_dist = {\"max_depth\": [10,25,50],\n",
+							"              \"learning_rate\" : [0.01,0.05],\n",
+							"              \"num_leaves\": [150,300,900],\n",
+							"              \"n_estimators\": [100,200]\n",
+							"             }\n",
+							"\n",
+							"grid_search = GridSearchCV(lg, n_jobs=-1, param_grid=param_dist, cv = 3, scoring=\"balanced_accuracy\", verbose=5)\n",
+							"grid_search.fit(X_train,Y_train)\n",
+							"\n",
+							"lgb_model=grid_search.best_estimator_\n",
+							"lgb_model.fit(X_train,Y_train)\n",
+							"\n",
+							"#evaluamos\n",
+							"y_predicted = lgb_model.predict(X_test)\n",
+							"\n",
+							"\n",
+							"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))\n",
+							"print(classification_report(Y_test, y_predicted))"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"# Importancia caracteristicas lgb\n",
+							"pyplot.bar(range(len(lgb_model.feature_importances_)), lgb_model.feature_importances_)\n",
+							"pyplot.show()"
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		}
+	]
+}
