@@ -1,5 +1,5 @@
 {
-	"name": "Notebook 1",
+	"name": "Proyecto-pmd-azure",
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -301,7 +301,7 @@
 			{
 				"cell_type": "code",
 				"source": [
-					"!pip install xgboost"
+					"import xgboost as xgb"
 				],
 				"execution_count": null
 			},
@@ -324,13 +324,6 @@
 					"y_predicted = model_xgbm.predict(X_test)\n",
 					"\n",
 					"print(\"Accuracy:\" , accuracy_score(Y_test, y_predicted),\"\\n\", \"ConfusionMatrix:\" ,\"\\n\", confusion_matrix(Y_test, y_predicted))"
-				],
-				"execution_count": null
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"import lightgbm as lgb"
 				],
 				"execution_count": null
 			},
